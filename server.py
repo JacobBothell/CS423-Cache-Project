@@ -4,23 +4,24 @@ import time
 
 class webApp(object):
     def __init__(self, socket,
-                 cSend = 0, cRecieve = 0, sSend = 0, sRecieve = 0,
+                 sSend = 0, sRecieve = 0,
                  name = ""):
         self.socket = socket
 
 async def hello(websocket, path):
     stuff = webApp(socket = websocket)
-    recv = await websocket.recv()
+    stuff.name = await websocket.recv()
     stuff.sRecieve = time.time()
-    stuff.name = recv
     print("< {}".format(stuff.name))
 
     greeting = "Hello {}!".format(stuff.name)
-    print("sending time")
-    await websocket.send(str(stuff.sRecieve))
-    print("sending greeting")
+    print("sending server's send time")
+    await websocket.send(str(time.time()))
+    print("sending file")
     await websocket.send(greeting)
     print("> {}".format(greeting))
+    print("sending server's recieve time")
+    await websocket.send(str(stuff.sRecieve))
 
 
 #main portion of the script
