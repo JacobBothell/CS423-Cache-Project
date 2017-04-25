@@ -3,6 +3,7 @@ import websockets
 import time
 import base64
 
+#TODO: move code into this container
 class webApp(object):
     def __init__(self, socket,
                  sSend = 0, sRecieve = 0,
@@ -10,6 +11,7 @@ class webApp(object):
         self.socket = socket
         self.server = server
 
+#TODO: make this a smaller function
 async def hello(websocket, path):
     stuff = webApp(socket = websocket)
     stuff.name = await websocket.recv()
@@ -19,11 +21,16 @@ async def hello(websocket, path):
     print("sending server's send time")
     await websocket.send(str(time.time()))
     print("sending file")
+    #looks for file in cache
+    #   gets data from server otherwise
     try:
         with open("./cache/" + str(stuff.name), 'rb') as file:
             print("file open")
+            #encoding for data transfer
             await websocket.send(base64.b64encode(file.read()))
     except FileNotFoundError:
+    #TODO: this dosen't work yet...
+        #supposed to go back to server and get files
         print("opening server socket")
         async with websockets.connect(stuff.server, max_size = None, klass = "HTTP") as serverSock:
             print("requesting file from server")
