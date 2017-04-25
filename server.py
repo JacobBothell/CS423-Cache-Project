@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import time
+import base64
 
 class webApp(object):
     def __init__(self, socket,
@@ -14,12 +15,17 @@ async def hello(websocket, path):
     stuff.sRecieve = time.time()
     print("< {}".format(stuff.name))
 
-    greeting = "Hello {}!".format(stuff.name)
     print("sending server's send time")
     await websocket.send(str(time.time()))
     print("sending file")
-    await websocket.send(greeting)
-    print("> {}".format(greeting))
+    try:
+        with open("./cache/" + str(stuff.name), 'rb') as file:
+            print("file open")
+            await websocket.send(base64.b64encode(file.read()))
+    except FileNotFoundError:
+        print("error")
+        await websocket.send("No File")
+    #print("> {}".format(greeting))
     print("sending server's recieve time")
     await websocket.send(str(stuff.sRecieve))
 
