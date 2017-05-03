@@ -2,6 +2,8 @@ import asyncio
 import http.client
 import time
 
+#designed to go out to the web and fetch an object
+# actually goes through a local cache server first
 class myClient:
 
     def __init__(self, server):
@@ -14,13 +16,16 @@ class myClient:
         # so a standard request can be used
         # otherwise use .putrequest, .putheader, .endheader
         print("Sending request")
+        #puts together the request
         client.request("GET", "/" + file)
+        #recieves the response
         resp = client.getresponse()
         print("opening file")
         with open("./client/" + file, "wb+") as file:
             print("Writing response to file")
             print(resp.status)
             file.write(resp.read())
+        #cleanup
             resp.close()
         client.close()
         return
@@ -29,6 +34,8 @@ client = myClient("localhost")
 client.getF("16A.jpg")
 
 """
+OLD CODE
+
 class webApp(object):
     def __init__(self, socket, file,
                  cSend = 0, cRecieve = 0, cEOF = 0, sSend = 0, sRecieve = 0,

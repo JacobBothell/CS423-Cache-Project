@@ -16,13 +16,16 @@ class myClient:
         # so a standard request can be used
         # otherwise use .putrequest, .putheader, .endheader
         print("Sending request")
+        #puts together request
         client.request("GET", "/CS423" + file)
+        #recieves the response
         resp = client.getresponse()
         print("opening file")
         with open("./cache/" + file, "wb+") as file:
             print("Writing response to file")
             print(resp.status)
             file.write(resp.read())
+        #cleanup
             resp.close()
         client.close()
         return
@@ -31,34 +34,36 @@ class myClient:
 # that asks the cache for data
 # specifically designed to transfer images
 class myHandler(BaseHTTPRequestHandler):
-    '''
-    def __init__(self, socket, addr, req):
-        self.socket = socket
-        self.addr = addr
-        http.server.BaseHTTPRequestHandler(socket, addr, req)
-    '''
 	
     #Handler for the GET requests
     def do_GET(self):
         print("GET Recieved")
+        #recieved time stamp
         Stime = time.time()
+        #putting together the response headers
         self.send_response(200)
         self.send_header('Content-type','image/png')
         self.send_header('Server-Recieve-Time', Stime)
+        #finishes the headers
         self.end_headers()
-        # Send the response
+        #Send the response
+        
+        #tries to send response but if file fails to open
+        # goes to origin server
         try:
             with open("./cache" + self.path, "rb") as file:
                 print("sending file to client")
+                #sends file to client
                 self.wfile.write(file.read())
                 print("file finished")
         except FileNotFoundError:
             print("going back to origin server")
-            #TODO go back to origin Server
+            #go back to origin Server
             client = myClient("bothellj.ddns.net:8080")
             client.getF(self.path)
             with open("./cache" + self.path, "rb") as file:
                 print("sending file to client")
+                #sends file to client
                 self.wfile.write(file.read())
         return
 
@@ -76,6 +81,8 @@ except KeyboardInterrupt:
 	server.socket.close()
 
 '''
+OLD CODE
+
 #TODO: make this a smaller function
 async def hello(websocket, path):
     stuff = webApp(socket = websocket)
