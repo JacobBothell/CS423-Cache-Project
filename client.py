@@ -1,8 +1,34 @@
 import asyncio
-import websockets
+import http.client
 import time
-import base64
 
+class myClient:
+
+    def __init__(self, server):
+        self.server = server
+
+    def getF(self, file):
+        print("Opening socket")
+        client = http.client.HTTPConnection(self.server)
+        #cache does not need to use custom headers
+        # so a standard request can be used
+        # otherwise use .putrequest, .putheader, .endheader
+        print("Sending request")
+        client.request("GET", "/" + file)
+        resp = client.getresponse()
+        print("opening file")
+        with open("./client/" + file, "wb+") as file:
+            print("Writing response to file")
+            print(resp.status)
+            file.write(resp.read())
+            resp.close()
+        client.close()
+        return
+
+client = myClient("localhost")
+client.getF("16A.jpg")
+
+"""
 class webApp(object):
     def __init__(self, socket, file,
                  cSend = 0, cRecieve = 0, cEOF = 0, sSend = 0, sRecieve = 0,
@@ -86,3 +112,4 @@ async def hello():
 loop = asyncio.get_event_loop()
 loop.run_until_complete(hello())
 loop.close()
+"""
