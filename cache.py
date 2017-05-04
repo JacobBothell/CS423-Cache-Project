@@ -1,5 +1,6 @@
-import asyncio
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
+import threading
 import http.client
 import time
 
@@ -21,10 +22,11 @@ class myClient:
         #recieves the response
         resp = client.getresponse()
         print("opening file")
+        print("Writing response to file")
+        print(resp.status)
+        data = resp.read()
         with open("./cache/" + file, "wb+") as file:
-            print("Writing response to file")
-            print(resp.status)
-            file.write(resp.read())
+            file.write(data)
         #cleanup
             resp.close()
         client.close()
@@ -34,7 +36,18 @@ class myClient:
 # that asks the cache for data
 # specifically designed to transfer images
 class myHandler(BaseHTTPRequestHandler):
-	
+
+    def sendF(self):
+        with open("./cache" + self.path, "rb") as file:
+            print("sending file to client")
+            self.send_header('Server-Send-Time', time.time())
+            #finishes the headers
+            self.end_headers()
+            #sends file to client
+            self.wfile.write(file.read())
+            print("file finished")
+        return
+    
     #Handler for the GET requests
     def do_GET(self):
         print("GET Recieved")
@@ -44,29 +57,30 @@ class myHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type','image/png')
         self.send_header('Server-Recieve-Time', Stime)
-        #finishes the headers
-        self.end_headers()
+
         #Send the response
         
         #tries to send response but if file fails to open
         # goes to origin server
         try:
-            with open("./cache" + self.path, "rb") as file:
-                print("sending file to client")
-                #sends file to client
-                self.wfile.write(file.read())
-                print("file finished")
+            self.sendF()
         except FileNotFoundError:
             print("going back to origin server")
             #go back to origin Server
             client = myClient("bothellj.ddns.net:8080")
             client.getF(self.path)
-            with open("./cache" + self.path, "rb") as file:
-                print("sending file to client")
-                #sends file to client
-                self.wfile.write(file.read())
+            self.sendF()
         return
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a seqerate thread."""
+    
+if __name__ == '__main__':
+    server = ThreadedHTTPServer(('localhost', 80), myHandler)
+    print ("Started Server")
+    server.serve_forever()
+
+'''
 try:
 	#Create a web server and define the handler to manage the
 	#incoming request
@@ -79,6 +93,7 @@ try:
 except KeyboardInterrupt:
 	print ('^C received, shutting down the web server')
 	server.socket.close()
+'''
 
 '''
 OLD CODE

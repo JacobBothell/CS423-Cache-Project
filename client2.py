@@ -75,7 +75,7 @@ class myClient:
 # then gets file from cache on local machine
 client = myClient("localhost")
 file = input("What file would you like: ")
-client.getF("baimage.jpg")
+client.getF("16A.jpg")
 
 """
 OLD CODE
