@@ -23,7 +23,7 @@ class myClient:
         resp = client.getresponse()
         print("opening file")
         print("Writing response to file")
-        print(resp.status)
+        print(resp.status, resp.reason)
         data = resp.read()
         with open("./cache/" + file, "wb+") as file:
             file.write(data)
